@@ -1,0 +1,24 @@
+on: [push, pull_request]
+name: Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.22.x]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: WillAbides/setup-go-faster@main
+      with:
+        go-version: ${{ matrix.go-version }}
+    - uses: actions/checkout@v4
+      with:
+         path: './src/github.com/kevinburke/slogdefault'
+    # staticcheck needs this for GOPATH
+    - run: |
+        echo "GOPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        echo "GO111MODULE=off" >> $GITHUB_ENV
+        echo "PATH=$GITHUB_WORKSPACE/bin:$PATH" >> $GITHUB_ENV
+    - name: Run tests
+      run: go test -trimpath -race -v ./...
+      working-directory: './src/github.com/kevinburke/slogdefault'
