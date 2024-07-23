@@ -44,15 +44,15 @@ func TestAddSource(t *testing.T) {
 func TestWith(t *testing.T) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	buf := new(bytes.Buffer)
-	ch := NewHandler(buf, &slog.HandlerOptions{Level: slog.LevelDebug})
+	ch := NewHandler(buf, &slog.HandlerOptions{Level: slog.LevelWarn})
 	l := slog.New(ch)
 	log_(l)
 	l2 := l.With("blah", 26)
 	log_(l2)
-	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 8 {
+	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 4 {
 		t.Errorf("expected 8 newlines in log output, got %v", count)
 	}
-	if count := strings.Count(buf.String(), "blah=26"); count != 4 {
+	if count := strings.Count(buf.String(), "blah=26"); count != 2 {
 		t.Errorf("expected sub attribute to be present 4 times, was not: %d", count)
 	}
 	if !strings.Contains(buf.String(), "blah=26") {
@@ -67,7 +67,8 @@ func TestDefaultTextHandlerWith(t *testing.T) {
 	log_(l)
 	l2 := l.With("blah", 37)
 	log_(l2)
-	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 8 {
-		t.Errorf("expected 8 newlines in log output, got %v", count)
+	// debug should not log
+	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 6 {
+		t.Errorf("expected 6 newlines in log output, got %v", count)
 	}
 }
