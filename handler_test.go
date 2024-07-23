@@ -40,3 +40,34 @@ func TestAddSource(t *testing.T) {
 		t.Errorf("source log did not match expected string %q", buf.String())
 	}
 }
+
+func TestWith(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	buf := new(bytes.Buffer)
+	ch := NewHandler(buf, &slog.HandlerOptions{Level: slog.LevelDebug})
+	l := slog.New(ch)
+	log_(l)
+	l2 := l.With("blah", 26)
+	log_(l2)
+	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 8 {
+		t.Errorf("expected 8 newlines in log output, got %v", count)
+	}
+	if count := strings.Count(buf.String(), "blah=26"); count != 4 {
+		t.Errorf("expected sub attribute to be present 4 times, was not: %d", count)
+	}
+	if !strings.Contains(buf.String(), "blah=26") {
+		t.Errorf("expected sub attribute to be present, was not")
+	}
+}
+
+func TestDefaultTextHandlerWith(t *testing.T) {
+	buf := new(bytes.Buffer)
+	next := slog.NewTextHandler(buf, nil)
+	l := slog.New(next)
+	log_(l)
+	l2 := l.With("blah", 37)
+	log_(l2)
+	if count := bytes.Count(buf.Bytes(), []byte{'\n'}); count != 8 {
+		t.Errorf("expected 8 newlines in log output, got %v", count)
+	}
+}

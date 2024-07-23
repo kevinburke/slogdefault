@@ -67,16 +67,18 @@ func (h *defaultHandler) Handle(ctx context.Context, r slog.Record) error {
 	if err := h.next.Handle(ctx, r); err != nil {
 		return err
 	}
-	buf.Write(h.buf.Bytes())
-	_, err := h.w.Write(buf.Bytes())
+	hbufbytes := h.buf.Bytes()
+	buf.Write(hbufbytes)
+	bufbytes := buf.Bytes()
+	_, err := h.w.Write(bufbytes)
 	h.buf.Reset()
 	return err
 }
 
 func (h *defaultHandler) WithAttrs(as []slog.Attr) slog.Handler {
-	return &defaultHandler{w: h.w, buf: new(bytes.Buffer), next: h.next.WithAttrs(as)}
+	return &defaultHandler{w: h.w, buf: h.buf, next: h.next.WithAttrs(as)}
 }
 
 func (h *defaultHandler) WithGroup(name string) slog.Handler {
-	return &defaultHandler{w: h.w, buf: new(bytes.Buffer), next: h.next.WithGroup(name)}
+	return &defaultHandler{w: h.w, buf: h.buf, next: h.next.WithGroup(name)}
 }
